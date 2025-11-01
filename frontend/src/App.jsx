@@ -4,11 +4,11 @@ import './App.css';
 
 function App() {
   return (
-    <div className="App">
+    <div className="app-wrapper">
       <header className="App-header">
         <h1>Ứng dụng nhận diện biển số xe công ty</h1>
       </header>
-      <main>
+      <main className="main-content">
         <Recognition />
       </main>
     </div>

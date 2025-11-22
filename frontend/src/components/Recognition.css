@@ -1,0 +1,63 @@
+.recognition-container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  gap: 20px;
+  padding: 20px;
+  background-color: #f4f4f9;
+}
+
+.camera-view {
+  flex: 1.5;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.result-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.result-box {
+  flex: 1;
+  /* Chiếm 50% chiều cao cột phải */
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+/* Khối lịch sử (Nửa dưới cột phải) */
+.history-box {
+  flex: 1;
+  /* Chiếm 50% chiều cao cột phải */
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  /* Cho phép cuộn nếu danh sách dài */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Điều chỉnh video cho vừa khung */
+.video-feed {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  max-height: 60vh;
+}
+
+.history-list {
+  flex-grow: 1;
+  overflow-y: auto;
+}

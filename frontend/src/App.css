@@ -1,3 +1,4 @@
+/* --- RESET --- */
 * {
   margin: 0;
   padding: 0;
@@ -9,54 +10,87 @@ body {
   background: #f0f2f5;
   color: #334155;
   height: 100vh;
+  width: 100vw;
   overflow: hidden;
 }
 
+#root,
+.App {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- HEADER --- */
 .App-header {
-  height: 60px;
+  height: 50px;
   background: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   z-index: 10;
-  position: relative;
 }
 
 .App-header h1 {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   color: #4f46e5;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
 }
 
+/* --- MAIN CONTAINER --- */
 .recognition-container {
   display: flex;
-  height: calc(100vh - 60px);
-  padding: 15px;
-  gap: 15px;
+  flex: 1;
+  width: 100%;
+  padding: 10px;
+  gap: 10px;
+  overflow: hidden;
 }
 
+/* --- CỘT TRÁI: CAMERA --- */
 .camera-view {
-  flex: 1.2;
+  flex: 3;
   background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 15px;
+
+  /* CẤU HÌNH FLEX MỚI: Xếp sát nhau, không giãn cách xa */
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
-  justify-content: center;
+  gap: 10px;
+  /* Khoảng cách cố định nhỏ giữa các phần tử */
+
+  height: 100%;
+  overflow: hidden;
   position: relative;
 }
 
+.camera-view h2 {
+  font-size: 1rem;
+  text-align: center;
+  flex-shrink: 0;
+  margin: 0;
+  /* Xóa margin thừa */
+}
+
 .video-container {
+  /* Tự động chiếm khoảng trống còn lại nhưng được phép co nhỏ */
+  flex: 1;
+  min-height: 0;
+  /* QUAN TRỌNG: Để video không đẩy nút ra ngoài */
+
   width: 100%;
-  height: 100%;
-  border-radius: 12px;
-  overflow: hidden;
   background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -65,12 +99,15 @@ body {
 .video-feed {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  /* Đảm bảo hình ảnh nằm gọn trong khung đen */
 }
 
 .capture-btn {
-  margin-top: 15px;
-  padding: 12px 30px;
+  flex-shrink: 0;
+  /* Không bao giờ bị co lại */
+  height: 45px;
+  padding: 0 40px;
   font-size: 1rem;
   font-weight: 600;
   color: white;
@@ -78,164 +115,115 @@ body {
   border: none;
   border-radius: 50px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 5px;
+  /* Khoảng hở nhỏ dưới cùng để không sát mép */
 }
 
 .capture-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(79, 70, 229, 0.4);
 }
 
-.capture-btn:disabled {
-  background: #cbd5e1;
-  box-shadow: none;
-  cursor: default;
-}
-
+/* --- CỘT PHẢI: KẾT QUẢ --- */
 .result-view {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  overflow: hidden;
+  gap: 10px;
+  height: 100%;
+  min-width: 320px;
 }
 
 .result-box {
   flex: 0 0 auto;
   background: #ffffff;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .result-box h2 {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #64748b;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.status-success {
-  background-color: #dcfce7;
-  color: #166534;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 15px;
-  display: inline-block;
-}
-
-.status-pending {
-  background-color: #fef3c7;
-  color: #92400e;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 15px;
-}
-
-.error-message {
-  color: #dc2626;
-  background-color: #fee2e2;
-  padding: 10px;
-  border-radius: 8px;
-  width: 100%;
-  text-align: center;
 }
 
 .license-plate {
-  font-family: 'Consolas', 'Monaco', monospace;
-  font-size: 2.5rem;
+  font-family: 'Consolas', monospace;
+  font-size: 2rem;
   font-weight: 700;
   color: #1e293b;
   background: #f8fafc;
-  border: 3px solid #1e293b;
-  padding: 10px 30px;
-  border-radius: 8px;
+  border: 2px solid #1e293b;
+  padding: 5px 20px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  text-align: center;
+  width: 100%;
   letter-spacing: 2px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 0 #cbd5e1;
 }
 
 .employee-info {
   width: 100%;
   background: #f8fafc;
-  border-radius: 12px;
-  padding: 15px;
+  border-radius: 8px;
+  padding: 12px;
   border: 1px solid #e2e8f0;
 }
 
-.employee-info h4 {
-  margin-bottom: 12px;
-  color: #334155;
-  font-size: 1rem;
-  border-bottom: 1px solid #e2e8f0;
-  padding-bottom: 8px;
-}
-
 .employee-info p {
-  display: grid;
-  grid-template-columns: 100px 1fr;
-  margin-bottom: 8px;
-  font-size: 0.95rem;
-  align-items: center;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
 }
 
 .employee-info p strong {
   color: #64748b;
-  /* Màu nhãn nhạt hơn */
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .history-box {
   flex: 1;
   background: #ffffff;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
 .history-box h2 {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #64748b;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
 .history-list {
   flex: 1;
   overflow-y: auto;
-  padding-right: 5px;
-}
-
-.history-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.history-list::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 4px;
 }
 
 .history-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .history-table th {
   text-align: left;
-  padding: 10px;
+  padding: 8px;
   background-color: #f1f5f9;
   color: #64748b;
   font-weight: 600;
@@ -244,51 +232,24 @@ body {
 }
 
 .history-table td {
-  padding: 10px;
+  padding: 8px;
   border-bottom: 1px solid #f1f5f9;
   color: #334155;
 }
 
-.history-table tr:last-child td {
-  border-bottom: none;
-}
-
-.plate-registered {
-  background: #dcfce7;
-  color: #166534;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-.plate-guest {
-  background: #f3f4f6;
-  color: #4b5563;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-family: monospace;
-}
-
-.time {
-  color: #94a3b8;
-  font-size: 0.85rem;
-}
-
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .recognition-container {
     flex-direction: column;
-    height: auto;
     overflow-y: auto;
   }
 
-  .camera-view,
-  .result-view {
+  .camera-view {
     flex: none;
-    width: 100%;
+    height: 60vh;
   }
 
-  .video-feed {
-    height: 300px;
+  .result-view {
+    flex: none;
+    min-width: 100%;
   }
 }

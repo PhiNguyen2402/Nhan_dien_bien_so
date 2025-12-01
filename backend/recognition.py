@@ -2,12 +2,8 @@ import cv2
 import numpy as np
 import re
 import pytesseract
-import mysql.connector  # <<< THÊM MỚI: Thư viện MySQL
-import datetime         # <<< THÊM MỚI: Thư viện thời gian
-
-# =======================================================
-# KHỐI 1: CẤU HÌNH
-# =======================================================
+import mysql.connector 
+import datetime       
 
 # --- Cấu hình Tesseract ---
 try:
@@ -16,18 +12,14 @@ except Exception as e:
     print("Lỗi: Không tìm thấy Tesseract. Hãy chắc chắn bạn đã cài đặt Tesseract OCR và cập nhật đúng đường dẫn.")
     print(e)
 
-# --- Cấu hình CSDL MySQL ---
-# !!! QUAN TRỌNG: Hãy điền thông tin CSDL của bạn vào đây
 MYSQL_CONFIG = {
-    'host': 'localhost',        # Hoặc IP/Domain của server
-    'user': 'root',    # Tên người dùng MySQL (ví dụ: 'root')
-    'password': 'tanphi1040',  # Mật khẩu của bạn
-    'database': 'cong_ty_db' # Tên CSDL (Schema) bạn đã tạo
+    'host': 'localhost',       
+    'user': 'root',   
+    'password': 'tanphi1040',  
+    'database': 'cong_ty_db'
 }
 
-# =======================================================
 # KHỐI 2: XỬ LÝ ẢNH VÀ OCR (Code gốc của bạn)
-# =======================================================
 
 def find_license_plate(image):
     """
@@ -55,11 +47,11 @@ def find_license_plate(image):
             
             if aspect_ratio > 2.5 and aspect_ratio < 5.0:
                 location = approx
-                plate_type = 'long' # Biển dài
+                plate_type = 'long' 
                 break
             elif aspect_ratio > 1.2 and aspect_ratio < 2.2:
                 location = approx
-                plate_type = 'square' # Biển vuông
+                plate_type = 'square' 
                 break
     
     if location is None:
@@ -118,7 +110,7 @@ def clean_plate_text(text):
 def recognize_plate_from_image(image_np):
     """Hàm chính điều phối việc nhận diện."""
     try:
-        # Bước 1: Tìm biển số và xác định loại biển (dài hay vuông)
+        #Tìm biển số và xác định loại biển (dài hay vuông)
         plate_region, plate_type = find_license_plate(image_np)
         
         if plate_region is None or plate_region.size == 0:
@@ -126,10 +118,10 @@ def recognize_plate_from_image(image_np):
             plate_region = cv2.cvtColor(image_np, cv2.COLOR_BGR2GRAY)
             plate_type = 'unknown' # Không xác định
 
-        # Bước 2: Đọc ký tự từ vùng ảnh với logic phù hợp
+        #Đọc ký tự từ vùng ảnh với logic phù hợp
         raw_text = ocr_from_plate(plate_region, plate_type)
         
-        # Bước 3: Dọn dẹp và chuẩn hóa text
+        #Dọn dẹp và chuẩn hóa text
         plate_text = clean_plate_text(raw_text)
         
         return plate_text
@@ -137,29 +129,26 @@ def recognize_plate_from_image(image_np):
         print(f"Lỗi trong quá trình nhận diện: {e}")
         return None
 
-# =======================================================
-# KHỐI 3: XỬ LÝ CSDL MYSQL (PHẦN ĐÃ SỬA/THÊM)
-# =======================================================
+#XỬ LÝ CSDL MYSQL 
 
-# --- HÀM SỬA ĐỔI ---
 def find_vehicle_info(plate_text):
     """
     Truy vấn CSDL MySQL để tìm thông tin xe VÀ thông tin nhân viên.
     Trả về: (phuongtien_id, nhan_vien_id, nhan_vien_info_dict)
     """
     if not plate_text:
-        return None, None, None # Trả về 3 giá trị
+        return None, None, None 
     
-    conn = None # Khởi tạo conn
+    conn = None 
     try:
-        # Kết nối đến server MySQL bằng cấu hình ở Khối 1
+        # Kết nối đến server MySQL
         conn = mysql.connector.connect(**MYSQL_CONFIG)
-        print(">>> Kết nối CSDL (find_vehicle_info) thành công.") # Log kết nối
+        print(">>> Kết nối CSDL (find_vehicle_info) thành công.")
         
         # Dùng dictionary=True để lấy kết quả dạng dict
         cursor = conn.cursor(dictionary=True) 
         
-        # 1. Truy vấn vào bảng phuongtien
+        # Truy vấn vào bảng phuongtien
         cursor.execute("SELECT id, nhan_vien_id FROM phuongtien WHERE bien_so = %s", (plate_text,))
         result = cursor.fetchone() 
         
@@ -167,9 +156,8 @@ def find_vehicle_info(plate_text):
             phuongtien_id = result['id']
             nhan_vien_id = result['nhan_vien_id']
             
-            # 2. Nếu tìm thấy nhan_vien_id, lấy thêm thông tin nhân viên
+            # Nếu tìm thấy nhan_vien_id, lấy thêm thông tin nhân viên
             if nhan_vien_id:
-                # (Giả định các cột của bạn là ho_ten, chuc_vu, ma_nhan_vien)
                 cursor.execute("SELECT ho_ten, chuc_vu, ma_nhan_vien, phong_ban FROM nhanvien WHERE id = %s", (nhan_vien_id,))
                 nhan_vien_info = cursor.fetchone() # Lấy thông tin nhân viên
                 
@@ -193,13 +181,12 @@ def find_vehicle_info(plate_text):
             cursor.close()
             conn.close()
 
-# --- HÀM NÀY GIỮ NGUYÊN ---
 def log_entry_time(plate_text, phuongtien_id, nhan_vien_id):
     """
     Lưu thông tin vào bảng lich_su_vao_ra trên MySQL.
     Hàm này CHỈ ĐƯỢC GỌI KHI ĐÃ XÁC NHẬN LÀ NHÂN VIÊN.
     """
-    conn = None # Khởi tạo conn
+    conn = None 
     try:
         current_time = datetime.datetime.now()
         
@@ -209,7 +196,6 @@ def log_entry_time(plate_text, phuongtien_id, nhan_vien_id):
         
         cursor = conn.cursor()
         
-        # (Giả định bạn đã tạo bảng 'lich_su_vao_ra' như đã trao đổi)
         sql_insert = """
             INSERT INTO lich_su_vao_ra 
             (thoi_gian_vao, bien_so_xe, phuongtien_id, nhan_vien_id) 
@@ -218,9 +204,8 @@ def log_entry_time(plate_text, phuongtien_id, nhan_vien_id):
         values = (current_time, plate_text, phuongtien_id, nhan_vien_id)
         
         cursor.execute(sql_insert, values)
-        conn.commit() # Xác nhận lưu thay đổi
+        conn.commit() 
         
-        # Log đã lưu
         print(f"ĐÃ LƯU: Xe nhân viên (BSX: {plate_text}) vào cổng lúc {current_time}")
             
     except mysql.connector.Error as e:
@@ -231,11 +216,8 @@ def log_entry_time(plate_text, phuongtien_id, nhan_vien_id):
             cursor.close()
             conn.close()
 
-# =======================================================
-# KHỐI 4: HÀM ĐIỀU PHỐI CHÍNH (LOGIC MỚI THEO YÊU CẦU)
-# =======================================================
+# HÀM ĐIỀU PHỐI CHÍNH (LOGIC MỚI THEO YÊU CẦU)
 
-# --- HÀM SỬA ĐỔI ---
 def process_vehicle_entry(image_path_or_np_array):
     """
     Hàm chính điều phối toàn bộ quy trình:
@@ -246,7 +228,7 @@ def process_vehicle_entry(image_path_or_np_array):
     Trả về: (plate_text, phuongtien_id, nhan_vien_id, nhan_vien_info)
     """
     
-    # 1. Đọc ảnh
+    # Đọc ảnh
     if isinstance(image_path_or_np_array, str):
         img = cv2.imread(image_path_or_np_array)
         if img is None:
@@ -255,7 +237,7 @@ def process_vehicle_entry(image_path_or_np_array):
     else:
         img = image_path_or_np_array
 
-    # 2. Nhận diện biển số (dùng hàm gốc của bạn)
+    # Nhận diện biển số 
     plate_text = recognize_plate_from_image(img)
     
     if not plate_text:
@@ -264,19 +246,12 @@ def process_vehicle_entry(image_path_or_np_array):
 
     print(f"Nhận diện được biển số: {plate_text}")
 
-    # 3. Tra cứu thông tin (dùng hàm MySQL mới, nhận 3 giá trị)
+    # Tra cứu thông tin 
     phuongtien_id, nhan_vien_id, nhan_vien_info = find_vehicle_info(plate_text)
     
-    # 4. GHI LOG (LOGIC MỚI THEO YÊU CẦU)
+    # 4. GHI LOG 
     if nhan_vien_id:
-        # TÌM THẤY NHÂN VIÊN:
-        # Hàm này sẽ log cả xe của nhân viên (có id) và xe khách (id là None)
         log_entry_time(plate_text, phuongtien_id, nhan_vien_id)
     else:
-        # KHÔNG TÌM THẤY:
-        # Chỉ thông báo và KHÔNG LƯU
         print(f"BIỂN CHƯA ĐĂNG KÝ: Biển {plate_text} không thuộc nhân viên nào. Không lưu vào CSDL.")
-    
-    # Trả về kết quả để có thể hiển thị lên giao diện
-    # nhan_vien_info sẽ là dict (nếu tìm thấy) hoặc None (nếu là khách)
     return plate_text, phuongtien_id, nhan_vien_id, nhan_vien_info
